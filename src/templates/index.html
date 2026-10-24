@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Index page</title>
+  </head>
+  <style>
+    body {
+      background-color: #ffcc00;
+    }
+
+    h1 {
+      font-family: "Comic Sans MS";
+      text-align: center;
+      padding-top: 140px;
+      font-size: 60px;
+      margin: -15px;
+    }
+
+    h2 {
+      font-family: "Comic Sans MS";
+      text-align: center;
+      padding-top: 50px;
+      font-size: 40px;
+      margin: -15px;
+      color: #907400;
+    }
+
+    p {
+      font-family: "Comic Sans MS";
+      font-size: 48px;
+      color: #907400;
+      text-align: center;
+    }
+  </style>
+  <body>
+    <h1>
+      This App is running on container <b>{{ hostname }}</b> and its IP is
+      <b>{{ ip }}</b>.
+    </h1>
+    <p>Version 3.0</p>
+    <h2>Master Containers with Bindesh</h2>
+  </body>
+</html>
