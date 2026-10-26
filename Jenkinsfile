@@ -43,6 +43,20 @@ pipeline {
                 
             }
         }
+        stage('Test SSH Connection') {
+        steps {
+            sshagent(credentials: ['remote-server-ssh']) {
+                sh '''
+                    ssh -v \
+                        -o BatchMode=yes \
+                        -o StrictHostKeyChecking=no \
+                        ec2-user@98.81.228.171 \
+                        "whoami"
+                '''
+            }
+        }   
+    }
+        
         
         stage('Deploy to remote docker host') {
             steps {
@@ -57,11 +71,10 @@ pipeline {
                         sh '''
                             set -eu
 
-                            ssh -o StrictHostKeyChecking=no \
+                            printf '%s\n' "$PASS" | ssh \
+                                -o StrictHostKeyChecking=no \
                                 ${SSH_TARGET_USER}@${SSH_TARGET_HOST} \
-                                "docker login -u '${USER}' --password-stdin" <<EOF
-                                ${PASS}
-                             EOF
+                                "docker login -u '$USER' --password-stdin"
 
                             ssh -o StrictHostKeyChecking=no \
                                 ${SSH_TARGET_USER}@${SSH_TARGET_HOST} \
@@ -80,6 +93,7 @@ pipeline {
                 }
             }
         }
+
 
  }
 post {
