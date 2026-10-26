@@ -43,19 +43,21 @@ pipeline {
                 
             }
         }
+       
         stage('Test SSH Connection') {
-        steps {
-            sshagent(credentials: ['remote-server-ssh']) {
-                sh '''
-                    ssh -v \
-                        -o BatchMode=yes \
-                        -o StrictHostKeyChecking=no \
-                        ec2-user@98.81.228.171 \
-                        "whoami"
-                '''
+            steps {
+                sshagent(credentials: ["${SSH_HOST_CREDS_ID}"]) {
+                    sh '''
+                        ssh -v \
+                            -o BatchMode=yes \
+                            -o StrictHostKeyChecking=no \
+                            ${SSH_TARGET_USER}@${SSH_TARGET_HOST} \
+                            "whoami"
+                    '''
+                }
             }
-        }   
-    }
+        }
+
         
         
         stage('Deploy to remote docker host') {
