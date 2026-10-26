@@ -43,41 +43,51 @@ pipeline {
                 
             }
         }
-        stage('Deploy to remote docker host'){
+        
+        stage('Deploy to remote docker host') {
             steps {
-                sshagent(["${env.SSH_HOST_CREDS_ID}"]){
-                    withCredentials([usernamePassword(credentialsId: "${env.REGISTRY_CREDS_ID}", usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                        sh """
-                            ssh -o StrictHostKeyChecking=no ${SSH_TARGET_USER}@${SSH_TARGET_HOST} '
-                                echo ${PASS} | docker login -u ${USER} --password-stdin
-                                docker pull ${IMAGE_NAME}:${IMAGE_TAG}
-                                if [ \$(docker ps -aq -f name=${CONTAINER_NAME}) ]; then
-                                    docker stop ${CONTAINER_NAME}
-                                    docker rm ${CONTAINER_NAME}
-                                fi
+                sshagent(["${SSH_HOST_CREDS_ID}"]) {
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: "${REGISTRY_CREDS_ID}",
+                            usernameVariable: 'USER',
+                            passwordVariable: 'PASS'
+                        )
+                    ]) {
+                        sh '''
+                            set -eu
 
+                            ssh -o StrictHostKeyChecking=no \
+                                ${SSH_TARGET_USER}@${SSH_TARGET_HOST} \
+                                "docker login -u '${USER}' --password-stdin" <<EOF
+                                ${PASS}
+                             EOF
+
+                            ssh -o StrictHostKeyChecking=no \
+                                ${SSH_TARGET_USER}@${SSH_TARGET_HOST} \
+                                "docker pull ${REGISTRY_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} &&
+                                if docker ps -aq -f name=^${CONTAINER_NAME}$ | grep -q .; then
+                                    docker rm -f ${CONTAINER_NAME}
+                                fi &&
                                 docker run -d \
                                     --name ${CONTAINER_NAME} \
                                     -p ${HOST_PORT}:${CONTAINER_PORT} \
                                     --restart always \
-                                    ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}
-
-                                docker logout
-                            '
-                        """
+                                    ${REGISTRY_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG} &&
+                                docker logout"
+                        '''
                     }
-
-                
                 }
             }
         }
-    }
+
+ }
 post {
-        always {
-            sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest || true"
-            sh "docker logout"
-        }
+    always {
+        sh 'docker logout || true'
+        sh 'docker image rm "${REGISTRY_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}" "${IMAGE_NAME}:${IMAGE_TAG}" || true'
     }
+}
  
 }
 
