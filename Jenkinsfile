@@ -7,8 +7,8 @@ pipeline {
         REGISTRY_USERNAME = "prajaktasc"
         IMAGE_NAME = "bin-pythonapp"
         IMAGE_TAG = "${env.BUILD_NUMBER}"  
-               SSH_TARGET_HOST    = '98.81.228.171'
-        SSH_TARGET_USER    = 'ec2-user'
+        SSH_TARGET_HOST    = '98.81.228.171'
+        SSH_TARGET_USER    = 'jenkins-deploy'
         CONTAINER_NAME     = 'flask-app'
         HOST_PORT          = '8080'
         CONTAINER_PORT     = '8080' 
