@@ -27,6 +27,16 @@ pipeline {
                 }
             }
         }
+        stage('Push image to registry'){
+            steps{
+                withCredentials([usernamePassword(credentialsId: "${REGISTRY_CREDS_ID}",
+                usernameVariable: 'USER', passwordVariable: 'PASS')]){
+                    sh "echo ${PASS} | docker login -u ${USER} --password-stdin"
+                    sh "docker image push ${REGISTRY_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}"
+                }
+                
+            }
+        }
     }
  
 }
