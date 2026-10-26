@@ -9,10 +9,10 @@ pipeline {
     }
 
     stages {
-        stage('Initialize the pieline'){
+        stage('Initialize the environment'){
             steps {
                 script {
-                    echo "Initializing the environment"
+                    echo "Initializing the pipeline"
                     sh 'docker --version'
                 }
             }
